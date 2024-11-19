@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patc
 import { AppService } from './app.service';
 import { Konyv } from './konyv';
 import { ujKonyvDTO } from './uj-konyv.dto';
+import { UpdateKonyvDTO } from './update-konyv.dto';
 
 @Controller()
 export class AppController {
@@ -62,10 +63,9 @@ export class AppController {
   @Delete('konyvek/:konyvid')
   @HttpCode(204)
   konyvTorles(@Param('konyvid') id: string){
-    
     const idSzam = parseInt(id);
     const konyvIndex = this.konyvek.findIndex(konyv => konyv.id == idSzam);
-    if (konyvIndex == 0) {
+    if (konyvIndex == -1) {
       throw new NotFoundException("ID wrong")
     }
     this.konyvek.splice(konyvIndex,1);
@@ -74,12 +74,26 @@ export class AppController {
   @HttpCode(201)
   ujKonyv(@Body() ujKonyvAdatok: ujKonyvDTO){
     const ujKonyv: Konyv = {
-      ...ujKonyvAdatok,
       id:this.nextID,
+      ...ujKonyvAdatok,
       reserved:false
     }
     this.nextID++;
     this.konyvek.push(ujKonyv);
+    return ujKonyv;
+  }
+
+  @Patch('konyvek/:konyvid')
+  @HttpCode(200)
+  patchKonyv(@Body() reszlegesKonyvAdatok: UpdateKonyvDTO,
+  @Param('konyvid') id: string){
+    const idSzam = parseInt(id);
+    const regiKonyvIndex = this.konyvek.findIndex (konyv => konyv.id == idSzam);    
+    const ujKonyv: Konyv = {
+      ...this.konyvek[regiKonyvIndex],
+      ...reszlegesKonyvAdatok
+    }
+    this.konyvek[regiKonyvIndex] = ujKonyv;
     return ujKonyv;
   }
 
