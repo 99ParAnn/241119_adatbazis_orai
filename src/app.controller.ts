@@ -1,6 +1,7 @@
-import { Controller, Delete, Get, HttpCode, NotFoundException, Param, Post, Render } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, NotFoundException, Param, Patch, Post, Render } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Konyv } from './konyv';
+import { ujKonyvDTO } from './uj-konyv.dto';
 
 @Controller()
 export class AppController {
@@ -69,7 +70,18 @@ export class AppController {
     }
     this.konyvek.splice(konyvIndex,1);
   }
-
+  @Post('konyvek')
+  @HttpCode(201)
+  ujKonyv(@Body() ujKonyvAdatok: ujKonyvDTO){
+    const ujKonyv: Konyv = {
+      ...ujKonyvAdatok,
+      id:this.nextID,
+      reserved:false
+    }
+    this.nextID++;
+    this.konyvek.push(ujKonyv);
+    return ujKonyv;
+  }
 
 
 }
